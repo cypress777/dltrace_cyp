@@ -9,6 +9,7 @@ int main(int argc, char **argv) {
         return 0;
     }
     cout << "main" << endl;
+    // program name and libname are passed to rec
     Record rec(argc - 1, argv + 1);
 
     rec.startWork();

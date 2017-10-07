@@ -21,15 +21,21 @@ namespace dltrace {
         m_eventQueue.push(event);
     }
 
+    /*
+     * Basically we gonna handle events in queue one by one, and then PTRACE_CONT them all at once
+     *
+     * Handling a breakpoint event requires disable bp, singlestep, and then enable bp. Note that we can
+     * make sure singlestep is successed only after a SIGTRAP is received. So do-event set
+     * m_issinglestep = true then breaks the loop after singlestep and the tracer waits for SIGTRAP in trace-event.
+     *
+     * Aftrer receiving SIGTRAP in trace-event, we will enable breakpoint and set issinglestep = false in trace-event.
+     * And submit a SINGLESTEP event to queue.
+     */
     void Record::handleEvent() {
-        assert(m_eventQueue.size() != 0);
+        assert(m_eventQueue.empty());
         cout<<m_eventQueue.size()<<" "<<m_trace->getProcesses().size()<<endl;
 
-/*        if(!m_trace->isAnyProcessSingleSteping())
-        {
-            m_isAllProcessesStopped=false;
-        }*/
-
+        //singlestep is successed only after SIGTRAP is received.
         if(m_trace->isAnyProcessSingleSteping())
             return;
 
@@ -46,8 +52,8 @@ namespace dltrace {
             m_eventQueue.pop();
             event.doEvent();
             if(event.getType()==Event::EVENTTYPE::BREAKPOINT)
+            //break the loop to wait SIGTRAP
             {
-                //m_isAllProcessesStopped=true;
                 break;
             }
         }
@@ -91,19 +97,28 @@ namespace dltrace {
     void Record::startWork() {
         cout << "start work." << endl;
         do {
-            //跟踪事件trace.traceEvent();
+           /*
+            * start tracing after initializaitions (load symboltable, enable breakpoints).
+            * when a event(clone/fork, syscalls, exiting, breakpoints, etc.) happended to any thread,
+            * we stop the thread and submit the event to handler.
+            */
             auto event = m_trace->traceEvent();
-            //提交事件submitEvent();
+            //submitting events
             if(event.getType() == Event::EVENTTYPE::COMPLETE) {
                 cout << "trace complete." << endl;
                 break;
             }
             if(event.getType() != Event::EVENTTYPE::NONE)
+                //push event to event queue
                 submitEvent(event);
             if(event.getType() == Event::EVENTTYPE::WTHP) {
                 cout << "what happened event..." << endl;
             }
-            //处理事件handleEvent();
+            /*
+             * Only start to handle events when ALL process are STOPPED,
+             * otherwise we just push the event into event queue then wait for all processes to stop.
+             * However when a breakpoint event happend, tracer will send SIGSTOP to all processes forcing them to stop.
+             */
             TimeEx frontTime, backTime;
             frontTime.getCurrentTime();
             handleEvent();

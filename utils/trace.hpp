@@ -20,6 +20,7 @@ namespace dltrace {
         std::string m_testFileName;
         char * const *m_argv;
         std::vector<std::string> m_libFileNames;
+        //FuncMsg includes: breakpoint address; func is in or out; FuncMsgIndexHash(address and func name)
         FuncMsgMap m_funcMsgs;
         std::unordered_map<unsigned long, BreakPointSptr> m_breakPoints;
         std::unordered_map<unsigned long, std::string> m_entryFuncNames;

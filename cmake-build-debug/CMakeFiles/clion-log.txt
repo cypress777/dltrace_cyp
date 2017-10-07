@@ -1,4 +1,0 @@
-/home/mfer/clion-2017.2.2/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/mfer/CLionProjects/dltrace
--- Configuring done
--- Generating done
--- Build files have been written to: /home/mfer/CLionProjects/dltrace/cmake-build-debug

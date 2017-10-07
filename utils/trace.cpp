@@ -41,6 +41,7 @@ namespace dltrace {
         cout << "first wait." << endl;
         setTraceOptions(process);
         m_processes.push_back(process);
+        //enable function's entry breakpoints in user's program.
         addEntryFuncMsgs();
         process.continueToRun();
         m_initialized = true;
@@ -124,10 +125,22 @@ namespace dltrace {
 
     Event Trace::traceEvent() {
         cout << "trace event" << endl;
+        /*
+         * 1.set tracee and tracer;
+         * 2.initiate functions' entry breakpoints in user's programs;
+         *   note that: library entry breakpoints would be initiate after main function is loaded;
+         *              all function's out breakpoints would be enabled until we stopped at it's entry.
+         */
         if(!m_initialized)
             initTrace();
 
+        //funciton run time = back - front - delay;
         TimeEx frontTime, backTime;
+
+        /*
+         * By defination, receiving any SIGTRAP indecates a process stopped at function entry/end breakpoint.
+         * However sometimes tracee will receive a SIGEGV or SIGILL at breakpoint instead.
+         */
         int status;
         auto pid = waitpid(-1, &status, __WALL);
         frontTime.getCurrentTime();
@@ -139,12 +152,14 @@ namespace dltrace {
         auto pProcess = find(m_processes.begin(), m_processes.end(), Process(pid));
         assert(pProcess != m_processes.end());
         if(WIFEXITED(status)) {
+            //process exited
             m_processes.erase(pProcess);
             backTime.getCurrentTime();
             m_delay += backTime - frontTime;
             return Event(frontTime, *pProcess, Event::EVENTTYPE::EXITED);
         }
         if(WIFSIGNALED(status)) {
+            //process exited by signal
             m_processes.erase(pProcess);
             backTime.getCurrentTime();
             m_delay += backTime - frontTime;
@@ -154,7 +169,7 @@ namespace dltrace {
         if(rip < 0) {
             int errnoSave = errno;
             if(!pProcess->isStopped()) {
-
+                //process should be runing but stopped by unknown reason, restart it.
                 cout << ERROR_START "process not stopped, is it terminating?" ERROR_END << endl;
                 pProcess->continueToRun();  
                 backTime.getCurrentTime();
@@ -170,6 +185,7 @@ namespace dltrace {
         if(WIFSTOPPED(status)) {
             auto what = status >> 16;
             if(what == PTRACE_EVENT_CLONE) {
+                //a new process is cloned
                 long newPid;
                 getPtraceEventMessage(*pProcess, &newPid);
                 cout << "clone : pid:" << dec << newPid << endl;
@@ -197,6 +213,7 @@ namespace dltrace {
 
         if(stopSig == SIGSTOP) {
             if(pProcess->isSingleStep()) {
+                //see more in breakpoint event handler
                 cout <<ERROR_START "singlestep but sigstop." ERROR_END<< endl;
                 exit(0);
             }
@@ -208,6 +225,7 @@ namespace dltrace {
 
         auto &callStack = pProcess->getCallStack();        
 
+        // make sure we don't miss any breakpoint
         if((stopSig == SIGSEGV || stopSig == SIGILL) && 
             (m_entryFuncNames.find(rip) != m_entryFuncNames.end() ||
             (!callStack.empty() && callStack.top().getAddr() == rip))
@@ -230,10 +248,9 @@ namespace dltrace {
             return Event(frontTime, *pProcess, Event::EVENTTYPE::SIGNALED);
         }
 
-        
-
-        /*breakpoint event*/
-
+        /*
+         * finally the event could be nothing but breakpoint event
+         */
         Event event(frontTime, *pProcess, Event::EVENTTYPE::BREAKPOINT);
         //see description in event.hpp to find why use stack here.
         stack<FuncMsg> funcMsgStack;
@@ -254,21 +271,16 @@ namespace dltrace {
             cout << "IN:func name:" << funcInIndex.getFuncName()<<" addr:"  << funcInIndex.getAddr() << endl;
 
             /*
-                start to load lib entries function messages when stopped at 
-                function's entry whoes name is main.
-                we think it is true that the libs in program is all loaded 
-                when program enter function whoes name is main.
-                is that so?
-            */
+             *  Start to enable library breakpoints and load their messages when process is stopped
+             *  at "main", considering all library function should be loaded and linked ready now.
+             *  Is that so?
+             */
             if(funcMsg.getFuncName() == "main") {
                 if(!m_libFileNames.empty())
                     addLibEntryFuncMsgs();
             }
 
-            /*
-                push func-end-message's index into process's callstack.
-            */
-            
+            //  push func-end breakpoint's index into process's callstack.
             FuncMsgIndex funcEndIndex;
             FuncMsg funcEndMsg;
             BreakPointSptr pBreakPoint;
@@ -281,26 +293,25 @@ namespace dltrace {
             callStack.push(funcEndIndex);
 
             /*
-                make sure funcEndIndex can refer to a func message in map.
-
-                if message is exist, just ignore.
-                else, create a message and insert it to map.
-            */
+             *  Make sure funcEndIndex refers to a valid funEndMessage.
+             *  If the index refers to a message in fun-end message map, then good;
+             *  else, create a new message and insert it to map.
+             */
             do {
                 if(m_funcMsgs.find(funcEndIndex) != m_funcMsgs.end()) {
-                    //message is exist.
+                    //fun-end message exists.
                     break;
                 }
 
-                /* message is not exist. */
+                /* fun-end message does not exist. */
 
-                //get breakpoint.
+                //get fun-end breakpoint
                 if(m_breakPoints.find(endAddr) != m_breakPoints.end()) {
-                    //breakpoint is exist.
+                    //breakpoint already exists.
                     pBreakPoint = m_breakPoints[endAddr];
                 }
                 else {
-                    //breakpoint is not exist, just create and insert it to map
+                    //It's a new end breakpoint, insert it to breakpoint map
                     pBreakPoint = make_shared<BreakPoint>(endAddr);
                     m_breakPoints[endAddr] = pBreakPoint;
                 }
@@ -308,7 +319,7 @@ namespace dltrace {
                 cout << "enable at ret :" << funcEndIndex.getFuncName() << endl;
                 pBreakPoint->enable(pProcess->getPid());
                 
-                //create message and insert it to map
+                //create fun-end message and insert it to message map
                 funcEndMsg.setBreakPoint(pBreakPoint);
                 funcEndMsg.setFuncName(funcEndIndex.getFuncName());
                 funcEndMsg.setType(FuncMsg::FUNCMSGTYPE::FUNCOUT);

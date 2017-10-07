@@ -1,3 +1,0 @@
-/home/lmx/WorkSpace/dltrace/build/CMakeFiles/rebuild_cache.dir
-/home/lmx/WorkSpace/dltrace/build/CMakeFiles/edit_cache.dir
-/home/lmx/WorkSpace/dltrace/build/CMakeFiles/dltrace.dir
