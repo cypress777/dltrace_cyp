@@ -1,0 +1,4 @@
+/Applications/CLion.app/Contents/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /Users/cypress/Works/dtrace-v1.0/dltrace
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/cypress/Works/dtrace-v1.0/dltrace
