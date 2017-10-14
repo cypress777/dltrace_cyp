@@ -10,7 +10,6 @@ namespace dltrace {
 
     class BreakPoint {
     private:
-        //m_data is 0 indecates not enabled
         unsigned long m_addr;
         uint8_t m_data;
 

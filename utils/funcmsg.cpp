@@ -1,4 +1,7 @@
+#include <cxxabi.h>
+#include <sstream>
 #include "funcmsg.hpp"
+
 
 using namespace std;
 
@@ -58,6 +61,23 @@ namespace dltrace {
 
     string FuncMsg::getFuncName() const {
         return m_funcName;
+    }
+
+
+    std::string FuncMsg::demangledFunc() {
+        if (m_funcName.find("_Z") != 0) 
+            return m_funcName;
+
+        const char * mangled = m_funcName.c_str();        
+        char * demangled;
+        int status = -1;
+        demangled = abi::__cxa_demangle(mangled, nullptr, nullptr, &status);
+
+        std::stringstream ss;
+        ss << demangled;
+        std::string demangledFunc;
+        ss >> demangledFunc;
+        return demangledFunc;
     }
 
     void FuncMsg::setType(FuncMsg::FUNCMSGTYPE type) {

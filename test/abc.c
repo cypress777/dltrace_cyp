@@ -10,7 +10,6 @@ void* threadFunc(void * args) {
     memset(str, 'a', 22);
     str[22] = 0;
     printf("%s\n", str);
-	fflush(stdout);
     free(str);
 }
 

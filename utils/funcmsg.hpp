@@ -56,6 +56,7 @@ namespace dltrace {
         std::string getFuncName() const;
         void setType(FUNCMSGTYPE);
         FUNCMSGTYPE getType() const;
+        std::string demangledFunc();
     };
 
     typedef std::unordered_map<FuncMsgIndex ,FuncMsg, FuncMsgIndexHash> FuncMsgMap;

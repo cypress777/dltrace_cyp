@@ -1,3 +1,3 @@
-/home/cypress/Works/test_dltrace/CMakeFiles/rebuild_cache.dir
-/home/cypress/Works/test_dltrace/CMakeFiles/edit_cache.dir
-/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir
+/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/rebuild_cache.dir
+/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/edit_cache.dir
+/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir

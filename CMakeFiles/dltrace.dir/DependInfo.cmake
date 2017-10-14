@@ -4,21 +4,29 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/cypress/Works/test_dltrace/event/event.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/event/event.cpp.o"
-  "/home/cypress/Works/test_dltrace/event/eventhandler.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/event/eventhandler.cpp.o"
-  "/home/cypress/Works/test_dltrace/main.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/main.cpp.o"
-  "/home/cypress/Works/test_dltrace/record.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/record.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/breakpoint.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/breakpoint.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/demangle.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/demangle.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/funcmsg.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/funcmsg.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/funcmsgsutil.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/funcmsgsutil.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/options.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/options.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/process.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/process.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/splitor.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/splitor.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/timeex.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/timeex.cpp.o"
-  "/home/cypress/Works/test_dltrace/utils/trace.cpp" "/home/cypress/Works/test_dltrace/CMakeFiles/dltrace.dir/utils/trace.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/breakpointevent.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/breakpointevent.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/cloneevent.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/cloneevent.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/event.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/event.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/eventhandler.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/eventhandler.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/exitedevent.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/exitedevent.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/ignoreevent.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/ignoreevent.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/newprocessevent.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/newprocessevent.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/signaledevent.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/signaledevent.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/signalexitedevent.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/signalexitedevent.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/event/singlesteppedevent.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/event/singlesteppedevent.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/main.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/main.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/record.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/record.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/breakpoint.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/breakpoint.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/demangle.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/demangle.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/funcmsg.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/funcmsg.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/funcmsgsutil.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/funcmsgsutil.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/options.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/options.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/process.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/process.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/splitor.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/splitor.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/timeex.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/timeex.cpp.o"
+  "/Users/cypress/Works/dtrace-v1.0/dltrace/utils/trace.cpp" "/Users/cypress/Works/dtrace-v1.0/dltrace/CMakeFiles/dltrace.dir/utils/trace.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "GNU")
+set(CMAKE_CXX_COMPILER_ID "AppleClang")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH

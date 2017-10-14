@@ -15,7 +15,6 @@ namespace dltrace {
         const char *m_testFileName;
         const char * const *m_argv;
         Trace *m_trace;
-        bool m_isAllProcessesStopped=false;
 
     CONSTRUCTOR:
         Record(int argc, char **argv);
@@ -28,8 +27,9 @@ namespace dltrace {
             called in constructor
         */ 
         virtual void parseOptions(int , char **) override;  
-        virtual void submitEvent(Event&) override;
-        virtual void handleEvent() override;
+        virtual void submitEvent(Event*) override;
+        virtual void handleEvent(Event*) override;
+        virtual void handleEventInQueue() override;        
     
     public:
         const char* getTestFileName() const;

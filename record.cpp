@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cassert>
 #include <cstring>
+#include <sys/reg.h>
 using namespace std;
 
 namespace dltrace {
@@ -17,53 +18,67 @@ namespace dltrace {
             delete m_trace;
     }
 
-    void Record::submitEvent(Event &event) {
+    void Record::submitEvent(Event *event) {
         m_eventQueue.push(event);
     }
 
-    /*
-     * Basically we gonna handle events in queue one by one, and then PTRACE_CONT them all at once
-     *
-     * Handling a breakpoint event requires disable bp, singlestep, and then enable bp. Note that we can
-     * make sure singlestep is successed only after a SIGTRAP is received. So do-event set
-     * m_issinglestep = true then breaks the loop after singlestep and the tracer waits for SIGTRAP in trace-event.
-     *
-     * Aftrer receiving SIGTRAP in trace-event, we will enable breakpoint and set issinglestep = false in trace-event.
-     * And submit a SINGLESTEP event to queue.
-     */
-    void Record::handleEvent() {
-        assert(m_eventQueue.empty());
-        cout<<m_eventQueue.size()<<" "<<m_trace->getProcesses().size()<<endl;
+    void Record::handleEvent(Event *event) {
+        auto leader = event->getProcess()->getLeader();
+        auto trace = event->getTrace();
 
-        //singlestep is successed only after SIGTRAP is received.
-        if(m_trace->isAnyProcessSingleSteping())
-            return;
-
-        if(!m_isAllProcessesStopped) {
-            if (m_eventQueue.size() < m_trace->getProcesses().size())
-                return;
-            else {
-                m_isAllProcessesStopped = true;
-            }
+        auto retEvent = event->doEvent();      
+        
+        if(retEvent != nullptr) {
+            submitEvent(retEvent);
         }
-        while(!m_eventQueue.empty()) {
 
-            Event event =m_eventQueue.front();
-            m_eventQueue.pop();
-            event.doEvent();
-            if(event.getType()==Event::EVENTTYPE::BREAKPOINT)
-            //break the loop to wait SIGTRAP
-            {
+        auto memOpProcess = leader->getMemOperatingProcess();
+        auto breakPoint = leader->getSingleStepBreakPoint();
+        auto state = leader->m_memOpState;
+
+        switch(state) {
+            case Process::MEMOPSTATE::NONE:
+                break;
+            case Process::MEMOPSTATE::DISABLING_BREAKPOINT:
+                cout << ERROR_START << dec << memOpProcess->getPid() << " disabling" << ERROR_END << endl;            
+                if(trace->isEveryOneStopped()) {
+                    breakPoint->disable(memOpProcess->getPid());
+                    leader->m_memOpState = Process::MEMOPSTATE::DISABLED_BREAKPOINT;
+                    goto disabled_breakpoint;
+                }
+                break;
+            disabled_breakpoint:
+            case Process::MEMOPSTATE::DISABLED_BREAKPOINT:
+                cout << ERROR_START << dec << memOpProcess->getPid() << " disabled" << ERROR_END << endl;            
+                if(memOpProcess->m_isSigStopped) {
+                    if(!memOpProcess->m_waitingForSigStop)
+                        memOpProcess->continueToRun();                    
+                }
+                else {
+                    leader->m_memOpState = Process::MEMOPSTATE::SINGLESTEPPING;                        
+                    goto singlestepping;
+                }
+                break;
+            singlestepping:
+            case Process::MEMOPSTATE::SINGLESTEPPING:
+                cout << ERROR_START << dec << memOpProcess->getPid() << " singlestepping" << ERROR_END << endl;            
+                memOpProcess->setRegister(RIP, breakPoint->getAddr());
+                if(memOpProcess->singleStep())
+                    leader->m_memOpState = Process::MEMOPSTATE::SINGLESTEPPED;
+                break;
+            case Process::MEMOPSTATE::SINGLESTEPPED:
+                break;
+        }
+    }
+
+    void Record::handleEventInQueue() {
+        while(!m_eventQueue.empty()) {
+            auto it = m_eventQueue.front();
+            if(it->doEvent() != nullptr) {
                 break;
             }
+            m_eventQueue.pop();
         }
-
-        if(m_isAllProcessesStopped && !m_trace->isAnyProcessSingleSteping() && m_eventQueue.empty())
-        {
-            m_isAllProcessesStopped=false;
-            m_trace->continueAllProcess();
-        }
-
     }
 
     const char* Record::getTestFileName() const{
@@ -97,33 +112,13 @@ namespace dltrace {
     void Record::startWork() {
         cout << "start work." << endl;
         do {
-           /*
-            * start tracing after initializaitions (load symboltable, enable breakpoints).
-            * when a event(clone/fork, syscalls, exiting, breakpoints, etc.) happended to any thread,
-            * we stop the thread and submit the event to handler.
-            */
+            handleEventInQueue();
             auto event = m_trace->traceEvent();
-            //submitting events
-            if(event.getType() == Event::EVENTTYPE::COMPLETE) {
+            if(event == nullptr) {
                 cout << "trace complete." << endl;
                 break;
             }
-            if(event.getType() != Event::EVENTTYPE::NONE)
-                //push event to event queue
-                submitEvent(event);
-            if(event.getType() == Event::EVENTTYPE::WTHP) {
-                cout << "what happened event..." << endl;
-            }
-            /*
-             * Only start to handle events when ALL process are STOPPED,
-             * otherwise we just push the event into event queue then wait for all processes to stop.
-             * However when a breakpoint event happend, tracer will send SIGSTOP to all processes forcing them to stop.
-             */
-            TimeEx frontTime, backTime;
-            frontTime.getCurrentTime();
-            handleEvent();
-            backTime.getCurrentTime();
-            m_trace->addDelay(backTime - frontTime);
+            handleEvent(event);
         } while(true);
     }    
 

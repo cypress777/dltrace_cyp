@@ -11,21 +11,30 @@
 namespace dltrace {
 
     class Process {
+    public:
+        enum class MEMOPSTATE {
+            NONE,
+            DISABLING_BREAKPOINT,
+            DISABLED_BREAKPOINT,
+            SINGLESTEPPING,
+            SINGLESTEPPED,
+        };
+    public:
+        bool m_isSigStopped = false;
+        bool m_waitingForSigStop = false;
+        bool m_isNew = false;
+        MEMOPSTATE m_memOpState = MEMOPSTATE::NONE;
     private:
         pid_t m_pid;
-        Process& m_leader;
-        std::stack<FuncMsgIndex> m_callStack;
-        bool m_isSingleStep;
-        bool m_isSigStopped;
-        bool m_isDelivered;
-        BreakPointSptr m_singleStepbreakPoint;
+        Process* m_leader;
+        Process *m_memOperatingProcess;
+        BreakPointSptr m_singleStepBreakPoint;
+        std::stack<FuncMsgIndex> m_callStack;        
 
     CONSTRUCTOR:
         Process(pid_t);
-        explicit Process(pid_t, Process&);
+        explicit Process(pid_t, Process*);
     DESTRUCTOR:
-
-    private:
 
     public:
         bool operator<(const Process&) const;
@@ -37,15 +46,20 @@ namespace dltrace {
         size_t getLibOffset(std::string);
         std::string getState();
         bool isStopped();
-        bool isSigStopped();
-        bool isDelivered();
-        bool isSingleStep();
         void stopProcess();
         void setRegister(int, long);
         long getRegister(int);
         long getData(unsigned long);
-        void continueToRun();
-        void singleStep(BreakPointSptr&);
+        void getPtraceEventMessage(long*);
+        size_t getExecOffset(std::string execName);
+        void setMemOperatingProcess(Process*);
+        Process* getMemOperatingProcess() const;
+        void setLeader(Process*);
+        Process* getLeader() const;
+        void setSingleStepBreakPoint(BreakPointSptr&);
+        BreakPointSptr getSingleStepBreakPoint() const;     
+        void continueToRun(int signum = 0);
+        bool singleStep();
         void afterSingleStep();
     };
 }

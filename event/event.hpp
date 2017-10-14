@@ -1,60 +1,44 @@
 #ifndef _DLTRACE_EVENT_H_
 #define _DLTRACE_EVENT_H_
 
-
-#include <sys/time.h>
-#include <stack>
-#include "../utils/process.hpp"
-#include "../utils/timeex.hpp"
+#include "../utils/trace.hpp"
 
 namespace dltrace {
 
+    class Trace;
+
     class Event {
     public:
-        enum class EVENTTYPE {
-            COMPLETE,
-            BREAKPOINT,
-            EXITED,
-            EXITE_SIGNALED,
-            SIGNALED,
-            CLONE,
-            PROCESSSTOP,
-            SINGLESTEP,
-            NONE,
-            WTHP,
+        enum class TYPE {
+            EV_BREAKPOINT,
+            EV_EXITED,
+            EV_SIGNAL_EXITED,
+            EV_SIGNALED,
+            EV_CLONE,
+            EV_NEWPROCESS,
+            EV_SINGLESTEPPED,
+            EV_IGNORE,
         };
 
-    private:
+    protected:
         TimeEx m_createTime;
-        EVENTTYPE m_type;
-        Process &m_process;
-        std::stack<FuncMsg> m_funcMsgs;
-        pid_t m_newPid;
+        Event::TYPE m_type;
+        Process *m_process;
+        Trace *m_trace;
 
     CONSTRUCTOR:
-        explicit Event(TimeEx&, Process&, EVENTTYPE);
+        Event(TimeEx, Process*, Trace*, TYPE);
     DESTRUCTOR:
-
-    private:
-        void doBreakPointEvent();
-        void doExitedEvent();
-        void doExitSignaledEvent();
-        void doSignaledEvent();
-        void doCloneEvent();
-        void doProcessStopEvent();        
-        void doSingleStepEvent();
+        virtual ~Event();
 
     public:
-        EVENTTYPE getType() const;
-        void setCreateTime(struct timeval);
+        virtual Event* doEvent() = 0;
+    public:
         TimeEx getCreateTime() const;
-        void setFuncMsgs(const std::stack<FuncMsg>&);
-        void setFuncMsgs(std::stack<FuncMsg>&&);
-        const std::stack<FuncMsg>& getFuncMsgs() const;
-        void setNewPid(pid_t);
-        pid_t getNewPid() const;
-        void doEvent();
-        
+        Event::TYPE getType() const;
+        Process* getProcess() const;
+        Trace* getTrace() const;
+
     };
 
 }

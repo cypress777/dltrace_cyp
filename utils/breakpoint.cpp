@@ -10,7 +10,7 @@ namespace dltrace {
     #define CHANGE_LAST_BYTE(DATA, BYTE) (CLEAR_LAST_BYTE(DATA) | BYTE) 
     #define GET_LAST_BYTE(DATA) ((DATA) & 0xFF)
 
-    BreakPoint::BreakPoint():m_addr(0), m_data(0) {}    
+    BreakPoint::BreakPoint():m_addr(-1), m_data(-1) {}    
 
     BreakPoint::BreakPoint(unsigned long addr):m_addr(addr), m_data(0){}
         
@@ -22,7 +22,7 @@ namespace dltrace {
     {
         if(m_data) return;
         long data;
-        data = ptrace(PTRACE_PEEKDATA, pid, m_addr, nullptr);
+        data = ptrace(PTRACE_PEEKDATA, pid, m_addr, 0);
         m_data = GET_LAST_BYTE(data);
         cout << "enable: addr:" << hex << m_addr << "\tdata:" << hex << data << endl;
         ptrace(PTRACE_POKEDATA, pid, m_addr, DATA_TO_TRAP(data));
@@ -32,8 +32,8 @@ namespace dltrace {
     {
         if(!m_data) return;
         long data;
-        data = ptrace(PTRACE_PEEKDATA, pid, m_addr, nullptr);
-        cout << "disable: addr:" << hex << m_addr << "\tdata:" << hex << data << endl;        
+        data = ptrace(PTRACE_PEEKDATA, pid, m_addr, 0);
+        //cout << "disable: addr:" << hex << m_addr << "\tdata:" << hex << data << endl;        
         ptrace(PTRACE_POKEDATA, pid, m_addr, CHANGE_LAST_BYTE(data,m_data));
         m_data = 0;
     }

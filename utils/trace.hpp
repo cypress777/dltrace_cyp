@@ -8,19 +8,21 @@
 #include <list>
 #include "funcmsg.hpp"
 #include "process.hpp"
-#include "../event/event.hpp"
 #include "timeex.hpp"
+#include "../event/event.hpp"
 
 namespace dltrace {
 
+    class Event;
+
     class Trace {
+        friend class BreakPointEvent;
     private:
         bool m_initialized;
         TimeEx m_delay;
         std::string m_testFileName;
         char * const *m_argv;
         std::vector<std::string> m_libFileNames;
-        //FuncMsg includes: breakpoint address; func is in or out; FuncMsgIndexHash(address and func name)
         FuncMsgMap m_funcMsgs;
         std::unordered_map<unsigned long, BreakPointSptr> m_breakPoints;
         std::unordered_map<unsigned long, std::string> m_entryFuncNames;
@@ -39,12 +41,12 @@ namespace dltrace {
         void enableBreakPoints() const;
         void addEntryFuncNames();
     public:
-        const std::list<Process>& getProcesses() const;
+        std::list<Process>& getProcesses();
         void addDelay(TimeEx);
         void continueAllProcess();
         void stopAllProcess();
-        bool isAnyProcessSingleSteping();
-        Event traceEvent();
+        bool isEveryOneStopped();
+        Event* traceEvent();
     };
 
 }
